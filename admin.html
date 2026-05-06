@@ -3,56 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Dữ Liệu AI</title>
+    <title>Quản Lý Hệ Thống</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #0b0e14; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .container { background: #151921; padding: 30px; border-radius: 20px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.6); width: 90%; max-width: 400px; border: 1px solid #2d333b; }
-        h2 { color: #5865F2; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px; }
-        button { background: linear-gradient(45deg, #5865F2, #4752c4); color: white; border: none; padding: 18px; border-radius: 12px; font-weight: bold; cursor: pointer; width: 100%; font-size: 16px; transition: 0.3s; }
-        button:active { transform: scale(0.95); }
-        #status { margin-top: 20px; font-size: 14px; font-weight: 500; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0b0e14; color: white; padding: 20px; }
+        .container { max-width: 500px; margin: auto; background: #151921; padding: 25px; border-radius: 15px; border: 1px solid #2d333b; }
+        h2 { color: #ed4245; text-align: center; }
+        input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #333; background: #0b0e14; color: white; margin: 10px 0; box-sizing: border-box; }
+        button { padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s; }
+        .btn-add { background: #3ba55c; color: white; margin-bottom: 20px; }
+        .img-card { display: flex; align-items: center; justify-content: space-between; background: #1c222d; padding: 10px; margin-top: 10px; border-radius: 8px; border: 1px solid #2d333b; }
+        .img-card img { width: 50px; height: 50px; object-fit: cover; border-radius: 5px; }
+        .btn-del { background: #ed4245; color: white; width: auto; padding: 5px 10px; font-size: 12px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>DATABASE ACCESS</h2>
-        <p style="color: #8a8f98; margin-bottom: 25px;">Nhấn để đồng bộ dữ liệu ảnh mới nhất lên máy chủ quản lý.</p>
-        <button onclick="sendRequest()">TRUY XUẤT NGAY</button>
-        <div id="status"></div>
+
+    <div id="login" class="container" style="text-align: center; margin-top: 100px;">
+        <h2>ADMIN LOGIN</h2>
+        <input type="password" id="pass" placeholder="Mật khẩu quản lý...">
+        <button style="background: #5865F2; color: white;" onclick="doLogin()">Vào kho ảnh</button>
+    </div>
+
+    <div id="panel" class="container" style="display:none;">
+        <h2>KHO ẢNH CỦA TÔI</h2>
+        <input type="text" id="url" placeholder="Dán link ảnh mới vào đây...">
+        <button class="btn-add" onclick="add()">THÊM ẢNH VÀO KHO</button>
+        <div id="list"></div>
+        <button style="background: #333; margin-top: 20px;" onclick="location.reload()">ĐĂNG XUẤT</button>
     </div>
 
     <script>
-        const webhookURL = "https://discord.com/api/webhooks/1501516937828634654/U3EaZf-U5UOwYO_Lq8vN7eAeSkqvnb-Pn5l9BsVDOzVhRqVCCdKhsYqFGF7C2I57ervu";
+        const KEY = "nghia672011"; // ĐỔI MẬT KHẨU TẠI ĐÂY
+        let photos = JSON.parse(localStorage.getItem('myPhotos')) || ["https://i.postimg.cc/3NDrgXqw/acc-moi.png"];
 
-        function sendRequest() {
-            // Lấy ảnh từ bộ nhớ trình duyệt (nếu có)
-            const photos = JSON.parse(localStorage.getItem('myPhotos')) || ["https://i.postimg.cc/3NDrgXqw/acc-moi.png"];
-            const currentImg = photos[photos.length - 1];
-            const status = document.getElementById('status');
+        function doLogin() {
+            if(document.getElementById('pass').value === KEY) {
+                document.getElementById('login').style.display = 'none';
+                document.getElementById('panel').style.display = 'block';
+                render();
+            } else { alert("Sai mật khẩu!"); }
+        }
 
-            status.innerText = "⏳ Đang kết nối...";
-            status.style.color = "#8a8f98";
+        function render() {
+            const list = document.getElementById('list');
+            list.innerHTML = photos.map((url, i) => `
+                <div class="img-card">
+                    <img src="${url}">
+                    <span style="font-size: 11px; flex: 1; margin: 0 10px; overflow: hidden; color: #8a8f98;">${url.substring(0,25)}...</span>
+                    <button class="btn-del" onclick="del(${i})">XÓA</button>
+                </div>
+            `).reverse().join(''); // Ảnh mới nhất hiện lên đầu
+        }
 
-            fetch(webhookURL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    content: "🔔 **Yêu cầu mới từ người dùng!**",
-                    embeds: [{
-                        title: "📂 TRUY XUẤT THÀNH CÔNG",
-                        description: "Hệ thống đã tự động gửi ảnh mới nhất.",
-                        image: { url: currentImg },
-                        color: 5763719,
-                        timestamp: new Date().toISOString()
-                    }]
-                })
-            }).then(() => {
-                status.innerText = "✅ Đồng bộ thành công!";
-                status.style.color = "#3ba55c";
-            }).catch(() => {
-                status.innerText = "❌ Lỗi kết nối máy chủ!";
-                status.style.color = "#ed4245";
-            });
+        function add() {
+            const val = document.getElementById('url').value;
+            if(val) {
+                photos.push(val);
+                localStorage.setItem('myPhotos', JSON.stringify(photos));
+                render();
+                document.getElementById('url').value = "";
+            }
+        }
+
+        function del(i) {
+            if(confirm("Xác nhận xóa?")) {
+                photos.splice(photos.length - 1 - i, 1); // Xử lý xóa vì đã dùng reverse()
+                localStorage.setItem('myPhotos', JSON.stringify(photos));
+                render();
+            }
         }
     </script>
 </body>
