@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #1a1a2e; color: white; padding: 20px; }
+        .container { max-width: 600px; margin: auto; background: #16213e; padding: 20px; border-radius: 12px; }
+        input { width: 80%; padding: 10px; border-radius: 5px; border: 1px solid #333; background: #0f3460; color: white; }
+        button { padding: 10px 15px; cursor: pointer; border: none; border-radius: 5px; font-weight: bold; }
+        .btn-add { background: #2ecc71; color: white; }
+        .btn-del { background: #e74c3c; color: white; padding: 5px; }
+        .img-card { display: flex; align-items: center; justify-content: space-between; background: #0f3460; padding: 10px; margin-top: 10px; border-radius: 8px; }
+        .img-card img { width: 60px; height: 60px; object-fit: cover; border-radius: 5px; }
+        #login-screen { text-align: center; margin-top: 100px; }
+    </style>
+</head>
+<body>
+
+    <!-- Màn hình khóa -->
+    <div id="login-screen">
+        <h2>Khu Vực Quản Trị</h2>
+        <input type="password" id="pass" placeholder="Nhập mật khẩu...">
+        <button onclick="login()" style="background: #5865F2; color: white;">Vào hệ thống</button>
+    </div>
+
+    <!-- Màn hình chính -->
+    <div id="main-admin" style="display:none;" class="container">
+        <h3>QUẢN LÝ KHO ẢNH</h3>
+        <div style="margin-bottom: 20px;">
+            <input type="text" id="newUrl" placeholder="Dán link ảnh vào đây...">
+            <button class="btn-add" onclick="add()">THÊM</button>
+        </div>
+        <div id="list"></div>
+    </div>
+
+    <script>
+        const passKey = "123"; // ĐỔI MẬT KHẨU TẠI ĐÂY
+        let photos = JSON.parse(localStorage.getItem('myPhotos')) || ["https://i.postimg.cc/3NDrgXqw/acc-moi.png"];
+
+        function login() {
+            if(document.getElementById('pass').value === passKey) {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('main-admin').style.display = 'block';
+                render();
+            } else { alert("Sai mã!"); }
+        }
+
+        function render() {
+            const listDiv = document.getElementById('list');
+            listDiv.innerHTML = photos.map((url, i) => `
+                <div class="img-card">
+                    <img src="${url}">
+                    <span style="font-size: 10px; overflow: hidden;">${url.substring(0,30)}...</span>
+                    <button class="btn-del" onclick="del(${i})">XÓA</button>
+                </div>
+            `).join('');
+        }
+
+        function add() {
+            const url = document.getElementById('newUrl').value;
+            if(url) {
+                photos.push(url);
+                save();
+                document.getElementById('newUrl').value = "";
+            }
+        }
+
+        function del(i) {
+            if(confirm("Xóa ảnh này?")) {
+                photos.splice(i, 1);
+                save();
+            }
+        }
+
+        function save() {
+            localStorage.setItem('myPhotos', JSON.stringify(photos));
+            render();
+        }
+    </script>
+</body>
+</html>
