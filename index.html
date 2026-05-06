@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Yêu Cầu Dữ Liệu</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0b0e14;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background: #151921;
+            padding: 30px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid #2d333b;
+        }
+        h2 { color: #5865F2; margin-top: 0; } /* Màu xanh Discord */
+        p { color: #8a8f98; font-size: 14px; line-height: 1.6; }
+        
+        button {
+            background: #5865F2;
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover { background: #4752c4; transform: translateY(-2px); }
+        button:active { transform: translateY(0); }
+        button:disabled { background: #3c4249; cursor: not-allowed; }
+
+        #status {
+            margin-top: 15px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Xác Nhận Truy Xuất</h2>
+    <p>Nhấn vào nút bên dưới để hệ thống tự động gửi thông tin tài khoản mới về máy chủ quản lý.</p>
+    
+    <button id="sendBtn" onclick="sendSpecificImage()">Gửi Thông Tin Ngay</button>
+    
+    <div id="status"></div>
+</div>
+
+<script>
+    // 1. Dán link Webhook Discord của bạn vào đây
+    const webhookURL = "https://discord.com/api/webhooks/1501516937828634654/U3EaZf-U5UOwYO_Lq8vN7eAeSkqvnb-Pn5l9BsVDOzVhRqVCCdKhsYqFGF7C2I57ervu"; 
+
+    // 2. Link ảnh cụ thể bạn đã cung cấp
+    const targetImage = "https://i.postimg.cc/3NDrgXqw/acc-moi.png";
+
+    function sendSpecificImage() {
+        const btn = document.getElementById('sendBtn');
+        const status = document.getElementById('status');
+
+        btn.disabled = true;
+        btn.innerText = "Đang truyền tải...";
+        status.innerText = "Đang kết nối với Webhook...";
+        status.style.color = "#8a8f98";
+
+        // Gửi dữ liệu qua Webhook
+        fetch(webhookURL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                content: "📩 **Thông báo: Có yêu cầu truy xuất ảnh tài khoản mới!**",
+                embeds: [
+                    {
+                        title: "Dữ liệu: acc-moi.png",
+                        description: "Hệ thống đã tự động gửi ảnh theo yêu cầu từ Website.",
+                        image: { url: targetImage },
+                        color: 5763719, // Màu xanh lá (Success)
+                        timestamp: new Date().toISOString()
+                    }
+                ]
+            })
+        })
+        .then(res => {
+            if (res.ok) {
+                status.innerText = "✅ Đã gửi dữ liệu thành công!";
+                status.style.color = "#3ba55c";
+            } else {
+                status.innerText = "❌ Lỗi: Webhook không phản hồi.";
+                status.style.color = "#ed4245";
+                btn.disabled = false;
+                btn.innerText = "Thử lại";
+            }
+        })
+        .catch(() => {
+            status.innerText = "❌ Lỗi: Không có kết nối mạng.";
+            status.style.color = "#ed4245";
+            btn.disabled = false;
+            btn.innerText = "Thử lại";
+        });
+    }
+</script>
+
+</body>
+</html>
