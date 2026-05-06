@@ -6,42 +6,51 @@
     <title>Hệ Thống Dữ Liệu AI</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #0b0e14; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .container { background: #151921; padding: 30px; border-radius: 16px; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.5); width: 90%; max-width: 400px; border: 1px solid #2d333b; }
-        h2 { color: #5865F2; }
-        button { background: #5865F2; color: white; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s; }
-        button:hover { background: #4752c4; }
-        #status { margin-top: 15px; font-size: 13px; }
+        .container { background: #151921; padding: 30px; border-radius: 20px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.6); width: 90%; max-width: 400px; border: 1px solid #2d333b; }
+        h2 { color: #5865F2; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px; }
+        button { background: linear-gradient(45deg, #5865F2, #4752c4); color: white; border: none; padding: 18px; border-radius: 12px; font-weight: bold; cursor: pointer; width: 100%; font-size: 16px; transition: 0.3s; }
+        button:active { transform: scale(0.95); }
+        #status { margin-top: 20px; font-size: 14px; font-weight: 500; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>HỆ THỐNG TRUY XUẤT</h2>
-        <p style="color: #8a8f98;">Nhấn để gửi dữ liệu ảnh lên Discord quản lý.</p>
-        <button onclick="sendLatest()">GỬI DỮ LIỆU NGAY</button>
+        <h2>DATABASE ACCESS</h2>
+        <p style="color: #8a8f98; margin-bottom: 25px;">Nhấn để đồng bộ dữ liệu ảnh mới nhất lên máy chủ quản lý.</p>
+        <button onclick="sendRequest()">TRUY XUẤT NGAY</button>
         <div id="status"></div>
     </div>
 
     <script>
-        const webhookURL = "https://discord.com/api/webhooks/1501516937828634654/U3EaZf-U5UOwYO_Lq8vN7eAeSkqvnb-Pn5l9BsVDOzVhRqVCCdKhsYqFGF7C2I57ervu"; // Dán link Discord vào đây
+        const webhookURL = "https://discord.com/api/webhooks/1501516937828634654/U3EaZf-U5UOwYO_Lq8vN7eAeSkqvnb-Pn5l9BsVDOzVhRqVCCdKhsYqFGF7C2I57ervu";
 
-        function sendLatest() {
-            // Lấy kho ảnh từ localStorage (đồng bộ với trang admin trên cùng trình duyệt)
-            const photoLibrary = JSON.parse(localStorage.getItem('myPhotos')) || ["https://i.postimg.cc/3NDrgXqw/acc-moi.png"];
-            const lastImg = photoLibrary[photoLibrary.length - 1];
+        function sendRequest() {
+            // Lấy ảnh từ bộ nhớ trình duyệt (nếu có)
+            const photos = JSON.parse(localStorage.getItem('myPhotos')) || ["https://i.postimg.cc/3NDrgXqw/acc-moi.png"];
+            const currentImg = photos[photos.length - 1];
             const status = document.getElementById('status');
 
-            status.innerText = "⏳ Đang truyền tải...";
+            status.innerText = "⏳ Đang kết nối...";
+            status.style.color = "#8a8f98";
+
             fetch(webhookURL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    embeds: [{ title: "📸 TRUY XUẤT ẢNH", image: { url: lastImg }, color: 5763719 }]
+                    content: "🔔 **Yêu cầu mới từ người dùng!**",
+                    embeds: [{
+                        title: "📂 TRUY XUẤT THÀNH CÔNG",
+                        description: "Hệ thống đã tự động gửi ảnh mới nhất.",
+                        image: { url: currentImg },
+                        color: 5763719,
+                        timestamp: new Date().toISOString()
+                    }]
                 })
             }).then(() => {
-                status.innerText = "✅ Thành công!";
+                status.innerText = "✅ Đồng bộ thành công!";
                 status.style.color = "#3ba55c";
             }).catch(() => {
-                status.innerText = "❌ Lỗi kết nối!";
+                status.innerText = "❌ Lỗi kết nối máy chủ!";
                 status.style.color = "#ed4245";
             });
         }
